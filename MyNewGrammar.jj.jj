@@ -1,0 +1,319 @@
+/**
+ * CPCS302 Project Group6
+ * Razan Alamri - Leen BA QALAQL - KHLOUD ALSOFYANI - Reema Almalki -RAWAN ALGHAMDI
+ */options{  static = true;}PARSER_BEGIN(MyNewGrammar)package CPCS302Project;
+
+public class MyNewGrammar {
+  public static void main(String args []) throws ParseException {
+
+    MyNewGrammar parser = new MyNewGrammar(System.in);
+    System.out.println("?????????????? Welcome To QMS Programming Language ??????????????");
+
+    while (true){
+      System.out.println("\nEnter your input: ");
+
+      try{
+        parser.Start();
+        System.out.println("\nSyntactically correct statement");
+        }
+
+     catch (Exception e){
+       System.out.println("Syntactically NOT correct statement");
+       System.out.println(e.getMessage());
+       break;
+       }
+    }
+  }
+}PARSER_END(MyNewGrammar)
+
+
+SKIP : {
+  /* White spaces */
+  	<  SPACE: " " >
+  | <  TAB: "\t" >
+  | <  NEWLINE:"\n" >
+  | "\r"
+}
+
+/* Comments */
+SPECIAL_TOKEN : {
+ // (~["\n"])*
+  < SINGLE_LINE_COMMENT: "??"(~["\n"])* > 
+  | < MULTIPLE_LINE_COMMENT: "?*"(< STRING >)*"*?"> 
+}
+
+/* Keywords */
+TOKEN : {
+  < IF: "IF" >
+| < DO: "DO" >
+| < IF_ELSE: "ELSEIF" >
+| < OTHER: "OTHER" >
+| < INTEGER_TYPE: "INTEGER" >
+| < DECIMAL_TYPE: "DECIMAL" >
+| < BOOLEAN_TYPE: "BOOLEAN" >
+| < STRING_TYPE: "STRING" >
+| < LOOP: "LOOP?" >
+| < ENDLOOP: "?END" >
+| < PRINT: "PRINT" >
+| < CONSTANT: "CONST" >
+| < ARRAY: "?ARR" >
+| < LINKED_LIST: "?LL" >
+| < EXIT: "EXIT">
+	{System.out.println("?????????????? Thank You For Using Our Programming Language ??????????????");
+	System.exit(0); }
+}
+/* Binary arithmetic operations */TOKEN : {
+  < PLUS: "+?" >
+| < MINUS: "-?" >
+| < MULTIPLICATION: "*?" >
+| < DIVIDE: "/?" >
+| < REMINDER: "%?" >
+| < ASSIGN: "=?" >
+}
+
+/* Unary arithmetic operations */
+TOKEN : {
+  < INCREMENT: "++?" >
+| < DECREMENT: "--?" >
+}
+
+/* Relational operations */
+TOKEN : {
+  < IS_EQUAL: "==?" >
+| < NOT_EQUAL: "!?" >
+| < GREATER_THAN: ">?" >
+| < LESS_THAN: "<?" >
+| < GREATER_OR_EQUAL: ">=?" >
+| < LESS_OR_EQUAL: "<=?" >
+}
+
+/* Logical operators */
+TOKEN : {
+  < AND: "?AND?" >
+| < OR: "?OR?" >
+| < NEGATE: "?NOT?" >
+}
+
+/* Punctuation Marks */
+TOKEN : {
+  < DOT: "." >
+| < COLON: ":" >
+| < L_BRACKET: "[" >
+| < R_BRACKET: "]" >
+| < L_PARENTHESIS: "(" >
+| < R_PARENTHESIS: ")" >
+| < QMS: "?" >
+}
+
+/* Identifiers */
+TOKEN : {
+  < ID: "_" ( <LETTER> | <DIGIT> | <SYMBOL> )+ "_" >
+}
+
+/* Data type */
+TOKEN : {
+  < INTEGER: ( <DIGIT> )+ >
+| < DECIMAL: ( <DIGIT> )+ "." ( <DIGIT> )+ >
+| < BOOLEAN: ( "T" | "F") >
+| < STRING: ( <LETTER> | <DIGIT> | <SYMBOL> )+ >
+}
+
+
+/* Alphabets */
+TOKEN : {
+  < #LETTER: ["a"-"z", "A"-"Z"] >
+| < LETTERS: (["a"-"z", "A"-"Z"])+ >
+| < #DIGIT: ["0"-"9"] >
+| < #SYMBOL: ["|", "&", ";", "#", "$", "@", ":", ",", "?"] >
+}
+
+
+
+//???????????????????????????? BNF ????????????????????????????
+
+/* This method is starting point of grammar / the EXIT keyword to terminate the program. */
+void Start() :
+{}
+{
+  Stmts() <DOT> | <EXIT>
+}
+
+/* This method defines a set of rules for constructing statements in the grammar. */
+void Stmts() :
+{}
+{
+    IFStmt()
+  | LOOKAHEAD(3) Assignment()
+  | Iteration()
+  | Constant()
+  | DataStructures()
+  | LOOKAHEAD(3) Stmt()
+  | DataType()
+}
+
+/* This method recognizes an assignment statement,
+	which consists of an identifier followed by an assignment operator (=?) and a statement.*/
+void Assignment() :
+{}
+{  { System.out.println("There is an Assignment Statement"); }
+  (<ID>)  (<ASSIGN>)  Stmt()
+  { System.out.println("There is an Assignment Statement"); }
+}
+
+/* This method recognizes a basic statement. */
+void Stmt(): {}
+{  
+  ((<ID>) | Data()| BooleanStat())?
+   (      ArithmeticStat()
+    | RelationalStat()
+    | LogicalStat()  
+    
+  )?
+  
+}
+
+/* ArithmeticStatement(): This method recognizes an arithmetic statement,
+	which consists of a binary or unary operator followed by an identifier or a number. */
+void ArithmeticStat(): {}
+{
+     (BinaryOP() | UnaryOP()) (<ID> | Number())
+    { System.out.println("There is a Arithmatic Statement"); }
+}
+
+// Binary arithmetic operator.
+void BinaryOP(): {}
+{
+  (<MULTIPLICATION> | <DIVIDE> | <PLUS> | <MINUS> | <REMINDER> | <ASSIGN> )
+  { System.out.println("There is a Binary Operation"); }
+}
+
+// Unary arithmetic operator.
+void UnaryOP(): {}
+{
+  (<INCREMENT> | <DECREMENT>) 
+  { System.out.println("There is a Unary Operation"); }
+}
+
+/* This method recognizes a relational expression,
+	which consists of a relational operator followedby an identifier or a number. */
+void RelationalStat(): {}
+{
+   RelationalOP() (<ID> | Number())
+  { System.out.println("There is a Relational Statement"); }
+}
+
+// Relational operator.
+void RelationalOP(): {}
+{
+  <IS_EQUAL> | <NOT_EQUAL> | <GREATER_THAN> | <LESS_THAN> | <GREATER_OR_EQUAL> | <LESS_OR_EQUAL>
+}
+
+/* This method recognizes a logical expression,
+	which consists of a logical operator followed by a boolean value. */
+void LogicalStat(): {}
+{
+     LogicalOP() <BOOLEAN> 
+    {System.out.println("There is a Logical Statement"); }
+}
+
+// Logical operator.
+void LogicalOP(): {}
+{
+  <AND> | <OR> | <NEGATE>
+}
+
+/* This method recognizes a boolean statement,
+	which consists of a boolean type followed by an identifier and a relational expression. */
+void BooleanStat(): {}
+{
+   <BOOLEAN_TYPE> <ID> <ASSIGN> (<ID> RelationalOP() <ID>) 
+  { System.out.println("There is a Boolean Statement"); }
+}
+
+/* This method recognizes a data value,
+	which can be an integer, decimal, string, or boolean. */
+void Data(): {}
+{
+  <INTEGER> | <DECIMAL> | <STRING> | <BOOLEAN>
+}
+
+// Number is INTEGER or DECIMAL.
+void Number(): { }
+{
+  <INTEGER> | <DECIMAL> 
+}
+  
+/* This method recognizes a data type,
+	which can be an integer, decimal, string, or boolean. */
+void DataType(): {}
+{
+  <INTEGER_TYPE> | <DECIMAL_TYPE> | <STRING_TYPE> | <BOOLEAN_TYPE>
+  { System.out.println("It is a Data Type"); }
+}
+
+/* This method recognizes an iteration statement,
+	which consists of a loop keyword followed by a condition in brackets, a colon, and a set of statements.
+	It also recognizes the END keyword to terminate the loop. */
+void Iteration(): {}
+{
+  <LOOP> <L_BRACKET> Condition() <R_BRACKET> <COLON> Stmts() <ENDLOOP>
+  { System.out.println("There is Iteration Statement"); }
+}
+
+/* This method recognizes a constant declaration,
+	which consists of a constant symbol followed by a variable declaration. */
+void Constant(): {}
+{
+ <QMS> <CONSTANT> DeclareVar() 
+}
+
+/* This method recognizes a variable declaration,
+	which consists of a data type, an identifier, an assignment operator, and a value. */
+void DeclareVar(): {}
+{
+  <INTEGER_TYPE> <ID> <ASSIGN> <INTEGER>
+  { System.out.println("There is Integer decleration"); }
+| <DECIMAL_TYPE> <ID> <ASSIGN> <DECIMAL>
+{ System.out.println("There is Decimal decleration"); }
+| <STRING_TYPE> <ID> <ASSIGN> <STRING>
+{ System.out.println("There is String decleration"); }
+| <BOOLEAN_TYPE> <ID> <ASSIGN> <BOOLEAN>
+{ System.out.println("There is Boolean decleration"); }
+}
+
+/* This method recognizes an if statement,
+	which consists of an if keyword followed by a condition in brackets, a do keyword, a print statement, and a set of statements.
+	It can also include an ELSEIF keyword and another set of statements in case the condition is not met. */
+void IFStmt(): {}
+{
+  <IF> <L_BRACKET> Condition() <R_BRACKET> <DO> <PRINT> <L_BRACKET> Stmts() <R_BRACKET>
+  (<OTHER> <PRINT> <L_BRACKET> Stmts() <R_BRACKET>)?
+  {System.out.println("There is If Statement"); }
+}
+
+/* This method recognizes a condition,
+	which consists of an identifier or a number followed by a relational operator and another identifier or number.*/
+void Condition(): {}
+{
+  ( (<ID> | Number()) RelationalOP() (<ID> | Number()) )
+}
+
+/* This method recognizes a data structure,
+	which can be an array or a linked list.
+	For arrays, it expects to see an identifier followed by a colon, a left bracket, a list of data values, and a right bracket.
+	For linked lists, it expects to see an identifier followed by a colon, a left bracket, a list of data values, and a right bracket, followed by zero or more sets of left and right brackets with additional lists of data values. */
+void DataStructures(): {}
+{
+    <ARRAY> <ID> <COLON> <L_BRACKET> (  Data() )* <R_BRACKET>
+  { System.out.println("There is a data structure: Array");}
+
+  | <LINKED_LIST> <ID> <COLON> <L_BRACKET>
+  <L_BRACKET> ( Data())+
+  <R_BRACKET> (<L_BRACKET> ( Data())+ <R_BRACKET>)*
+  <R_BRACKET>
+  { System.out.println("There is a data structure: Linked List"); }
+}
+
+
+
+

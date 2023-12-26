@@ -1,0 +1,411 @@
+/**
+ * CPCS302 Project Group6
+ * Razan Alamri - Leen BA QALAQL - KHLOUD ALSOFYANI - Reema Almalki -RAWAN ALGHAMDI
+ */options{  static = true;}PARSER_BEGIN(MyNewGrammar)package JavaJJT;
+
+public class MyNewGrammar{  public static void main(String args [])  {
+    System.out.println("?????????????? Welcome To QMS Programming Language ??????????????");
+
+    System.out.print("Enter an expression like \"IF [_grade_>? 60] DO PRINT [_G_ =? 5].\" :");    new MyNewGrammar(System.in);    try    {      SimpleNode n = MyNewGrammar.Start();      n.dump(" .?");      System.out.println("Thank you for using QMS.");    }    catch (Exception e)    {      System.out.println("?Error.");      System.out.println(e.getMessage());    }  }}PARSER_END(MyNewGrammar)SKIP :{  /* White spaces */
+  	<  SPACE: " " >
+  | <  TAB: "\t" >
+  | <  NEWLINE:"\n" >
+  | "\r"}
+
+/* Comments */
+SPECIAL_TOKEN : {
+ // (~["\n"])*
+  < SINGLE_LINE_COMMENT: "??"(~["\n"])* > 
+  | < MULTIPLE_LINE_COMMENT: "?*"(< STRING >)*"*?"> 
+}
+/* Keywords */
+TOKEN : {
+  < IF: "IF" > { System.out.println("\n ? if statment ? "); }
+| < DO: "DO" >
+| < IF_ELSE: "ELSEIF" >{ System.out.println("\n ? else if statment ? "); }
+| < OTHER: "OTHER" >
+| < INTEGER_TYPE: "INTEGER" >{ System.out.println("\n ? Integer Number ? "); }
+| < DECIMAL_TYPE: "DECIMAL" > { System.out.println("\n ? DECIMAL Number ? "); }
+| < BOOLEAN_TYPE: "BOOLEAN" > { System.out.println("\n ?  Boolean statment ? "); }
+| < STRING_TYPE: "STRING" >
+| < LOOP: "LOOP?" >
+| < ENDLOOP: "?END" >
+| < PRINT: "PRINT" >
+| < CONSTANT: "CONST" >
+| < ARRAY: "?ARR" >
+| < LINKED_LIST: "?LL" >
+| < EXIT: "EXIT">
+	{System.out.println("?????????????? Thank You For Using Our Programming Language ??????????????");
+	System.exit(0); }
+}
+
+/* Binary arithmetic operations */
+TOKEN : {
+  < PLUS: "+?" > { System.out.println("\n ? binary arithmetic statment ? "); }
+| < MINUS: "-?" > { System.out.println("\n ? binary arithmetic statment ? "); }
+| < MULTIPLICATION: "*?" > { System.out.println("\n ? binary arithmetic statment ? "); }
+| < DIVIDE: "/?" > { System.out.println("\n ? binary arithmetic statment ? "); }
+| < REMINDER: "%?" > { System.out.println("\n ? binary arithmetic statment ? "); }
+| < ASSIGN: "=?" > { System.out.println("\n ? assignment statment ? "); }
+}
+
+/* Unary arithmetic operations */
+TOKEN : {
+  < INCREMENT: "++?" > { System.out.println("\n ? unary arithmetic statment ? "); }
+| < DECREMENT: "--?" > { System.out.println("\n ? unary arithmetic statment ? "); }
+}
+
+/* Relational operations */
+TOKEN : {
+  < IS_EQUAL: "==?" > { System.out.println("\n ? relational statment ? "); }
+| < NOT_EQUAL: "!?" > { System.out.println("\n ? relational statment ? "); }
+| < GREATER_THAN: ">?" > { System.out.println("\n ? relational statment ? "); }
+| < LESS_THAN: "<?" > { System.out.println("\n ? relational statment ? "); }
+| < GREATER_OR_EQUAL: ">=?" > { System.out.println("\n ? relational statment ? "); }
+| < LESS_OR_EQUAL: "<=?" > { System.out.println("\n ? relational statment ? "); }
+}
+
+/* Logical operators */
+TOKEN : {
+  < AND: "?AND?" > { System.out.println("\n ? logical statment ? "); }
+| < OR: "?OR?" > { System.out.println("\n ? logical statment ? "); }
+| < NEGATE: "?NOT?" > { System.out.println("\n ? logical statment ? "); }
+}
+
+/* Punctuation Marks */
+TOKEN : {
+  < DOT: "." >
+| < COLON: ":" >
+| < L_BRACKET: "[" >
+| < R_BRACKET: "]" >
+| < L_PARENTHESIS: "(" >
+| < R_PARENTHESIS: ")" >
+| < QMS: "?" >
+}
+
+/* Identifiers */
+TOKEN : {
+  < ID: "_" ( <LETTER> | <DIGIT> | <SYMBOL> )+ "_" >
+}
+
+/* Data type */
+TOKEN : {
+  < INTEGER: ( <DIGIT> )+ >
+| < DECIMAL: ( <DIGIT> )+ "." ( <DIGIT> )+ >
+| < BOOLEAN: ( "T" | "F") >
+| < STRING: ( <LETTER> | <DIGIT> | <SYMBOL> )+ >
+}
+
+
+/* Alphabets */
+TOKEN : {
+  < #LETTER: ["a"-"z", "A"-"Z"] >
+| < LETTERS: (["a"-"z", "A"-"Z"])+ >
+| < #DIGIT: ["0"-"9"] >
+| < #SYMBOL: ["|", "&", ";", "#", "$", "@", ":", ",", "?"] >
+}
+/* This method is starting point of grammar / the EXIT keyword to terminate the program. */SimpleNode Start() :{}
+{ Stmts() DOT()
+   {
+     return jjtThis;
+   }
+    |  EXIT()
+   {
+     return jjtThis;
+   }
+}
+void EXIT () : { Token token; }
+{
+  token = < EXIT > { jjtThis.jjtSetValue(token.image); }
+}
+/* This method defines a set of rules for constructing statements in the grammar. */
+void Stmts() :
+{}
+{
+   IFStmt()
+  | LOOKAHEAD(3) Assignment()
+  | Iteration()
+  | Array()
+  | LinkedList()
+  | CONSTANT()
+  | Print() 
+  | LOOKAHEAD(3) Stmt()
+  | DataType()
+}
+void Assignment() : { } /* This method recognizes an assignment statement,
+	which consists of an identifier followed by an assignment operator (=?) and a statement.*/
+{
+ID ()  ASSIGN () Stmt() 
+}
+
+void Stmt(): { }/* This method recognizes a basic statement. */
+{  
+  ((ID()) | Data()| BooleanStat())?
+   (
+      ArithmeticStat()
+    | RelationalStat()
+    | LogicalStat()  
+  )?
+}
+void ArithmeticStat(): {} /* recognizes an arithmetic statement,which consists of a binary or unary operator followed by an identifier or a number. */
+{
+    (BinaryOP() | UnaryOP()) (ID() | Number())
+}
+void BinaryOP(): {}// Binary arithmetic operator.
+{
+    (MULTIPLICATION() | DIVIDE() | PLUS() | MINUS() | REMINDER() | ASSIGN() )
+}
+void PLUS () : { Token token; }
+{
+  token = < PLUS > { jjtThis.jjtSetValue(token.image); }
+}
+void MINUS () : { Token token; }
+{
+  token = < MINUS > { jjtThis.jjtSetValue(token.image); }
+}
+void MULTIPLICATION () : { Token token; }
+{
+  token = < MULTIPLICATION > { jjtThis.jjtSetValue(token.image); }
+}
+void DIVIDE () : { Token token; }
+{
+  token = < DIVIDE > { jjtThis.jjtSetValue(token.image); }
+}
+void REMINDER () : { Token token; }
+{
+  token = < REMINDER > { jjtThis.jjtSetValue(token.image); }
+}
+void UnaryOP(): { }// Unary arithmetic operator.
+{
+  (INCREMENT() | DECREMENT()) 
+}
+void INCREMENT () : { Token token; }
+{
+  token = < INCREMENT > { jjtThis.jjtSetValue(token.image); }
+}
+void DECREMENT () : { Token token; }
+{
+  token = < DECREMENT > { jjtThis.jjtSetValue(token.image); }
+}
+void RelationalStat(): {} /* recognizes a relational expression,which consists of a relational operator followedby an identifier or a number. */
+{
+    RelationalOP() (ID() | Number())
+}
+void RelationalOP(): {}// Relational operator.
+{
+    IS_EQUAL() | NOT_EQUAL() | GREATER_THAN() | LESS_THAN() | GREATER_OR_EQUAL() | LESS_OR_EQUAL()
+}
+void CompareOP() : { }
+{
+  LESS_THAN()
+| LESS_OR_EQUAL()
+| GREATER_THAN()
+| GREATER_OR_EQUAL()
+| IS_EQUAL()
+| NOT_EQUAL()
+}
+void LESS_THAN () : { Token token; }
+{
+  token = < LESS_THAN > { jjtThis.jjtSetValue(token.image); }
+}
+void LESS_OR_EQUAL () : { Token token; }
+{
+  token = < LESS_OR_EQUAL > { jjtThis.jjtSetValue(token.image); }
+}
+void GREATER_THAN () : { Token token; }
+{
+  token = < GREATER_THAN > { jjtThis.jjtSetValue(token.image); }
+}
+void GREATER_OR_EQUAL () : { Token token; }
+{
+  token = < GREATER_OR_EQUAL > { jjtThis.jjtSetValue(token.image); }
+}
+void IS_EQUAL () : { Token token; }
+{
+  token = < IS_EQUAL > { jjtThis.jjtSetValue(token.image); }
+}
+void NOT_EQUAL () : { Token token; }
+{
+  token = < NOT_EQUAL > { jjtThis.jjtSetValue(token.image); }
+}
+void LogicalStat(): {} /* recognizes a logical expression,which consists of a logical operator followed by a boolean value. */
+{
+    LogicalOP() BOOLEAN()    
+}
+void LogicalOP(): {}// Logical operator.
+{
+    AND() | OR() | NEGATE()
+}
+void AND () : { Token token; }
+{
+  token = < AND > { jjtThis.jjtSetValue(token.image); }
+}
+void NEGATE () : { Token token; }
+{
+  token = < NEGATE > { jjtThis.jjtSetValue(token.image); }
+}
+void OR () : { Token token; }
+{
+  token = < OR > { jjtThis.jjtSetValue(token.image); }
+}
+void BooleanStat(): {} /* recognizes a boolean statement,which consists of a boolean type followed by an identifier and a relational expression. */
+{
+   BOOLEAN_TYPE()  ID()  ASSIGN()  (ID()  RelationalOP() ID() ) 
+}
+void Data(): {} /* recognizes a data value,which can be an integer, decimal, string, or boolean. */
+{
+   INTEGER() | DECIMAL() | STRING() | BOOLEAN()
+}
+void Number(): { }// Number is INTEGER or DECIMAL.
+{
+  INTEGER() | DECIMAL() 
+}
+void DataType () : { }/* recognizes a data type,which can be an integer, decimal, string, or boolean. */
+{
+  INTEGER_TYPE() | DECIMAL_TYPE() | BOOLEAN_TYPE()| STRING_TYPE()
+}
+void Iteration(): { } /* This method recognizes an iteration statement,
+	which consists of a loop keyword followed by a condition in brackets, a colon, and a set of statements.
+	It also recognizes the END keyword to terminate the loop. */
+{
+        LOOP() L_BRACKET() Condition() R_BRACKET() COLON() Stmts() ENDLOOP()
+}
+void LOOP () : { Token token; }
+{
+  token = < LOOP > { jjtThis.jjtSetValue(token.image); }
+}
+void ENDLOOP () : {Token token; }
+{
+  token = < ENDLOOP > { jjtThis.jjtSetValue(token.image); }
+}
+void CONSTANT(): { }
+{
+  QMS() Constant() DeclareVar()
+}
+void Constant () : { Token token; }
+{
+  token = < CONSTANT > { jjtThis.jjtSetValue(token.image); }
+}
+void IFStmt(): {}
+{
+  IF() L_BRACKET() Condition() R_BRACKET() DO() PRINT() L_BRACKET() Stmts() R_BRACKET()
+  (OTHER() PRINT() L_BRACKET() Stmts() R_BRACKET())?
+}
+void IF () : { Token token; }
+{
+  token = < IF > { jjtThis.jjtSetValue(token.image); }
+}         
+void OTHER () : { Token token; }
+{
+  token = < OTHER > { jjtThis.jjtSetValue(token.image); }
+}
+void DO () : { Token token; }
+{
+  token = < DO > { jjtThis.jjtSetValue(token.image); }
+}
+void Condition(): {}
+{
+  ((ID() | Number()) RelationalOP() (ID() | Number()) )
+}
+void Array() : { }
+{
+ARRAY() ID() COLON() L_BRACKET() (  Data() )* R_BRACKET()
+}
+void ARRAY () : { Token token; }
+{
+  token = < ARRAY > { jjtThis.jjtSetValue(token.image); }
+}
+void LinkedList() : { }
+{
+	LINKED_LIST() ID() COLON() L_BRACKET() L_BRACKET() ( Data())+
+ 	R_BRACKET() (L_BRACKET() ( Data())+ R_BRACKET())* R_BRACKET()
+}
+void LINKED_LIST () : { Token token; }
+{
+  token = < LINKED_LIST > { jjtThis.jjtSetValue(token.image); }
+}
+void DeclareVar() : { }
+{
+INTEGER_TYPE() ID() ASSIGN() INTEGER()
+| DECIMAL_TYPE() ID() ASSIGN() DECIMAL()
+| STRING_TYPE() ID() ASSIGN() STRING()
+| BOOLEAN_TYPE() ID() ASSIGN() BOOLEAN()
+}
+void ID () : { Token token; }
+{
+  token = < ID > { jjtThis.jjtSetValue(token.image); }
+}
+void INTEGER_TYPE () : { Token token; }
+{
+  token = < INTEGER_TYPE > { jjtThis.jjtSetValue(token.image); }
+}
+void DECIMAL_TYPE () : { Token token; }
+{
+  token = < DECIMAL_TYPE > { jjtThis.jjtSetValue(token.image); }
+}
+void BOOLEAN_TYPE () : { Token token; }
+{
+  token = < BOOLEAN_TYPE > { jjtThis.jjtSetValue(token.image); }
+}
+void STRING_TYPE () : { Token token; }
+{
+  token = < STRING_TYPE > { jjtThis.jjtSetValue(token.image); }
+}
+void INTEGER () : {Token token; }
+{
+  token = < INTEGER > { jjtThis.jjtSetValue(token.image); }
+}
+void DECIMAL () : { Token token; }
+{
+  token = < DECIMAL > { jjtThis.jjtSetValue(token.image); }
+}
+void BOOLEAN () : { Token token; }
+{
+  token = < BOOLEAN > { jjtThis.jjtSetValue(token.image); }
+}
+void STRING () : { Token token; }
+{
+  token = < STRING > { jjtThis.jjtSetValue(token.image); }
+}
+void L_BRACKET () : { Token token; }
+{
+  token = < L_BRACKET > { jjtThis.jjtSetValue(token.image); }
+}
+void R_BRACKET () : { Token token; }
+{
+  token = < R_BRACKET > { jjtThis.jjtSetValue(token.image); }
+}
+void L_PARENTHESIS () : { Token token; }
+{
+  token = < L_PARENTHESIS > { jjtThis.jjtSetValue(token.image); }
+}
+void R_PARENTHESIS () : { Token token; }
+{
+  token = < R_PARENTHESIS > { jjtThis.jjtSetValue(token.image); }
+}
+void QMS () : {Token token; }
+{
+  token = < QMS > { jjtThis.jjtSetValue(token.image); }
+}
+void COLON () : {Token token; }
+{
+  token = < COLON > { jjtThis.jjtSetValue(token.image); }
+}
+void Print() : { }
+{
+  PRINT() L_BRACKET() (STRING())+ R_BRACKET()
+}
+void PRINT () : { Token token; }
+{
+  token = < PRINT > { jjtThis.jjtSetValue(token.image); }
+}
+void DOT () : { Token token; }
+{
+  token = < DOT > { jjtThis.jjtSetValue(token.image); }
+}
+void ASSIGN () : {Token token; }
+{
+  token = < ASSIGN > { jjtThis.jjtSetValue(token.image); }
+}
+
+
